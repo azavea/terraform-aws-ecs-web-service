@@ -29,22 +29,60 @@ module "app_web_service" {
   cluster_name                   = "default"
   task_definition_id             = "${aws_ecs_task_definition.app.family}:${aws_ecs_task_definition.app.revision}"
   desired_count                  = "1"
+  min_count                      = "1"
+  max_count                      = "2"
+  scale_up_cooldown_seconds      = "300"
+  scale_down_cooldown_seconds    = "300"
   deployment_min_healthy_percent = "100"
   deployment_max_percent         = "200"
-
-  container_name = "django"
-  container_port = "8080"
+  container_name                 = "django"
+  container_port                 = "8080"
 
   project     = "${var.project}"
   environment = "${var.environment}"
+}
+
+resource "aws_cloudwatch_metric_alarm" "app_service_high_cpu" {
+  alarm_name          = "alarmAppCPUUtilizationHigh"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = "60"
+  statistic           = "Average"
+  threshold           = "60"
+
+  dimensions {
+    ClusterName = "default"
+    ServiceName = "App"
+  }
+
+  alarm_actions = ["${module.app_web_service.appautoscaling_policy_scale_up_arn}"]
+}
+
+resource "aws_cloudwatch_metric_alarm" "app_service_low_cpu" {
+  alarm_name          = "alarmAppCPUUtilizationLow"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = "60"
+  statistic           = "Average"
+  threshold           = "15"
+
+  dimensions {
+    ClusterName = "default"
+    ServiceName = "App"
+  }
+
+  alarm_actions = ["${module.app_web_service.appautoscaling_policy_scale_down_arn}"]
 }
 ```
 
 ## Variables
 
-- `ecs_service_role_policy_arn` - Policy ARN for ECS service role (default: `AmazonEC2ContainerServiceRole`)
+- `name` - Name of the service in `CamelCase` without spaces
 - `vpc_id` - ID of VPC housing the service
-- `name` - Name of the service
 - `public_subnet_ids` - A list of public subnet IDs used to place load balancers
 - `access_log_bucket` - Bucket name used to collect load balancer access logs
 - `access_log_prefix` - Prefix within bucket to nest load balancer access logs
@@ -54,10 +92,14 @@ module "app_web_service" {
 - `cluster_name` - ECS cluster name to associate with the service
 - `task_definition_id` - Concatenation of ECS task definition family and revision separated by a colon
 - `desired_count` - Desired number of service instances (default: `1`)
+- `min_count` - Minimum number of service instances (default: `1`)
+- `max_count` - Maximum number of service instances (default: `1`)
 - `deployment_min_healthy_percent` - Minimum healthy service instances as a percentage (default: `100`)
 - `deployment_max_percent` - Maximum service instances as a percentage (default: `200`)
 - `container_name` - Name of container in task definition to associate with load balancer
 - `container_port` - Port exposed by container in task definition to associate with load balancer
+- `scale_up_cooldown_seconds` - Amount of time, in seconds, after a scale up activity completes and before the next can start (default: `300`)
+- `scale_down_cooldown_seconds` - Amount of time, in seconds, after a scale down activity completes before the next can start (default: `300`)
 - `project` - Name of project for this service (default: `Unknown`)
 - `environment` - Name of environment for this service (default: `Unknown`)
 
@@ -68,3 +110,5 @@ module "app_web_service" {
 - `lb_zone_id` - Service load balancer hosted zone ID
 - `lb_dns_name` - Service load balancer DNS name
 - `lb_security_group_id` - Security group ID of load balancer security group
+- `appautoscaling_policy_scale_up_arn` - ARN of Application AutoScaling policy to scale up
+- `appautoscaling_policy_scale_down_arn` - ARN of Application AutoScaling policy to scale down

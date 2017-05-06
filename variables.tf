@@ -6,10 +6,6 @@ variable "environment" {
   default = "Unknown"
 }
 
-variable "ecs_service_role_policy_arn" {
-  default = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
-}
-
 variable "vpc_id" {}
 
 variable "name" {}
@@ -49,3 +45,19 @@ variable "deployment_max_percent" {
 variable "container_name" {}
 
 variable "container_port" {}
+
+variable "min_count" {
+  default = "1"
+}
+
+variable "max_count" {
+  default = "1"
+}
+
+variable "scale_up_cooldown_seconds" {
+  default = "300"
+}
+
+variable "scale_down_cooldown_seconds" {
+  default = "300"
+}
