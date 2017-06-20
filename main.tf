@@ -1,53 +1,4 @@
 #
-# IAM resources
-#
-data "aws_iam_policy_document" "ecs_assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["ecs.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
-}
-
-resource "aws_iam_role" "ecs_service_role" {
-  name               = "ecs${var.environment}ServiceRole"
-  assume_role_policy = "${data.aws_iam_policy_document.ecs_assume_role.json}"
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_service_role" {
-  role       = "${aws_iam_role.ecs_service_role.name}"
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
-}
-
-data "aws_iam_policy_document" "ecs_autoscale_assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["application-autoscaling.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
-}
-
-resource "aws_iam_role" "ecs_autoscale_role" {
-  name               = "ecs${var.environment}AutoscaleRole"
-  assume_role_policy = "${data.aws_iam_policy_document.ecs_autoscale_assume_role.json}"
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_service_autoscaling_role" {
-  role       = "${aws_iam_role.ecs_autoscale_role.name}"
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole"
-}
-
-#
 # Security group resources
 #
 resource "aws_security_group" "main" {
@@ -130,7 +81,7 @@ resource "aws_ecs_service" "main" {
   desired_count                      = "${var.desired_count}"
   deployment_minimum_healthy_percent = "${var.deployment_min_healthy_percent}"
   deployment_maximum_percent         = "${var.deployment_max_percent}"
-  iam_role                           = "${aws_iam_role.ecs_service_role.name}"
+  iam_role                           = "${var.ecs_service_role_name}"
 
   load_balancer {
     target_group_arn = "${aws_alb_target_group.main.id}"
@@ -146,7 +97,7 @@ resource "aws_appautoscaling_target" "main" {
   service_namespace  = "ecs"
   resource_id        = "service/${var.cluster_name}/${aws_ecs_service.main.name}"
   scalable_dimension = "ecs:service:DesiredCount"
-  role_arn           = "${aws_iam_role.ecs_autoscale_role.arn}"
+  role_arn           = "${var.ecs_autoscale_role_arn}"
   min_capacity       = "${var.min_count}"
   max_capacity       = "${var.max_count}"
 
