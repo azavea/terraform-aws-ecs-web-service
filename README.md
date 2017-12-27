@@ -114,3 +114,10 @@ resource "aws_cloudwatch_metric_alarm" "app_service_low_cpu" {
 - `lb_security_group_id` - Security group ID of load balancer security group
 - `appautoscaling_policy_scale_up_arn` - ARN of Application AutoScaling policy to scale up
 - `appautoscaling_policy_scale_down_arn` - ARN of Application AutoScaling policy to scale down
+
+## Information
+
+The security group is intentionally left empty so that users can associate rules with it via the `aws_security_group_rule` resource. 
+An example of how we do that in practice can be found here: https://github.com/geotrellis/tree-prioritization-demo/blob/master/deployment/terraform/firewall.tf#L4-L12
+
+
