@@ -5,6 +5,16 @@ A Terraform module to create an Amazon Web Services (AWS) EC2 Container Service 
 ## Usage
 
 ```hcl
+resource "aws_security_group_rule" "app_lb_https_ingress" {
+  type        = "ingress"
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+
+  security_group_id = "${module.app_web_service.lb_security_group_id}"
+}
+
 resource "aws_ecs_task_definition" "app" {
   lifecycle {
     create_before_destroy = true
@@ -115,9 +125,4 @@ resource "aws_cloudwatch_metric_alarm" "app_service_low_cpu" {
 - `appautoscaling_policy_scale_up_arn` - ARN of Application AutoScaling policy to scale up
 - `appautoscaling_policy_scale_down_arn` - ARN of Application AutoScaling policy to scale down
 
-## Information
-
-The security group is intentionally left empty so that users can associate rules with it via the `aws_security_group_rule` resource. 
-An example of how we do that in practice can be found here: https://github.com/geotrellis/tree-prioritization-demo/blob/master/deployment/terraform/firewall.tf#L4-L12
-
-
+**Note**: A security group for the service load balancer is created within the module without any rules. Use the `lb_security_group_id` output along with `aws_security_group_rule` as seen in the example above to add your own security group rules.
