@@ -102,7 +102,6 @@ resource "aws_cloudwatch_metric_alarm" "app_service_low_cpu" {
 - `cluster_name` - ECS cluster name to associate with the service
 - `task_definition_id` - Concatenation of ECS task definition family and revision separated by a colon
 - `ecs_service_role_name` - Name of IAM role for ECS tasks
-- `ecs_autoscale_role_arn` - ARN of IAM role for ECS Application Autoscaling
 - `desired_count` - Desired number of service instances (default: `1`)
 - `min_count` - Minimum number of service instances (default: `1`)
 - `max_count` - Maximum number of service instances (default: `1`)

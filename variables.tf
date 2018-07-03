@@ -63,4 +63,3 @@ variable "scale_down_cooldown_seconds" {
 }
 
 variable "ecs_service_role_name" {}
-variable "ecs_autoscale_role_arn" {}
