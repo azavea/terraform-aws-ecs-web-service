@@ -15,7 +15,7 @@ resource "aws_security_group" "main" {
 # ALB resources
 #
 resource "aws_alb" "main" {
-  security_groups = ["${aws_security_group.main.id}"]
+  security_groups = ["${concat(var.security_group_ids, list(aws_security_group.main.id))}"]
   subnets         = ["${var.public_subnet_ids}"]
   name            = "alb${var.environment}${var.name}"
 
@@ -38,6 +38,7 @@ resource "aws_alb_target_group" "main" {
     healthy_threshold   = "3"
     interval            = "30"
     protocol            = "HTTP"
+    matcher             = "200"
     timeout             = "3"
     path                = "${var.health_check_path}"
     unhealthy_threshold = "2"
@@ -97,7 +98,6 @@ resource "aws_appautoscaling_target" "main" {
   service_namespace  = "ecs"
   resource_id        = "service/${var.cluster_name}/${aws_ecs_service.main.name}"
   scalable_dimension = "ecs:service:DesiredCount"
-  role_arn           = "${var.ecs_autoscale_role_arn}"
   min_capacity       = "${var.min_count}"
   max_capacity       = "${var.max_count}"
 

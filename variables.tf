@@ -10,6 +10,11 @@ variable "vpc_id" {}
 
 variable "name" {}
 
+variable "security_group_ids" {
+  type = "list"
+  default = []
+}
+
 variable "public_subnet_ids" {
   type = "list"
 }
@@ -63,4 +68,3 @@ variable "scale_down_cooldown_seconds" {
 }
 
 variable "ecs_service_role_name" {}
-variable "ecs_autoscale_role_arn" {}
