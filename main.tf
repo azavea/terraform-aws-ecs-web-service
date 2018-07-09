@@ -15,7 +15,7 @@ resource "aws_security_group" "main" {
 # ALB resources
 #
 resource "aws_alb" "main" {
-  security_groups = ["${aws_security_group.main.id}"]
+  security_groups = ["${concat(var.security_group_ids, list(aws_security_group.main.id))}"]
   subnets         = ["${var.public_subnet_ids}"]
   name            = "alb${var.environment}${var.name}"
 

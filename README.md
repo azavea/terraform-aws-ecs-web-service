@@ -25,7 +25,7 @@ resource "aws_ecs_task_definition" "app" {
 }
 
 module "app_web_service" {
-  source = "github.com/azavea/terraform-aws-ecs-web-service?ref=0.1.0"
+  source = "github.com/azavea/terraform-aws-ecs-web-service?ref=0.4.0"
 
   name                = "App"
   vpc_id              = "vpc-..."
@@ -47,6 +47,8 @@ module "app_web_service" {
   deployment_max_percent         = "200"
   container_name                 = "django"
   container_port                 = "8080"
+  
+  ecs_service_role_name = "..."
 
   project     = "${var.project}"
   environment = "${var.environment}"
@@ -94,6 +96,7 @@ resource "aws_cloudwatch_metric_alarm" "app_service_low_cpu" {
 - `name` - Name of the service in `CamelCase` without spaces
 - `vpc_id` - ID of VPC housing the service
 - `public_subnet_ids` - A list of public subnet IDs used to place load balancers
+- `security_group_ids` - A list of security group IDs to append to the load balancer (default: `[]`)
 - `access_log_bucket` - Bucket name used to collect load balancer access logs
 - `access_log_prefix` - Prefix within bucket to nest load balancer access logs
 - `health_check_path` - Path to use for service health check (default: `/`)
