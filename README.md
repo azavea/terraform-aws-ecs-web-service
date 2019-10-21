@@ -1,5 +1,7 @@
 # terraform-aws-ecs-web-service
 
+[![CircleCI](https://circleci.com/gh/azavea/terraform-aws-ecs-web-service.svg?style=svg)](https://circleci.com/gh/azavea/terraform-aws-ecs-web-service)
+
 A Terraform module to create an Amazon Web Services (AWS) EC2 Container Service (ECS) service associated with an Application Load Balancer (ALB).
 
 ## Usage
